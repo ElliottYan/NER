@@ -1,0 +1,52 @@
+import numpy as np
+import os
+import pdb
+
+
+def init():
+    vec, word_id = read_in_word2vec()
+    relation_id = read_in_relations()
+
+
+def read_in_word2vec():
+    print("Now reading Word_embeddings!")
+    vec = []
+    word_id = {}
+    f = open("./origin_data/vec.txt")
+    f.readline()
+    count = 0
+    while True:
+        content = f.readline()
+        if content == "" :
+            break
+        content = content.strip().split()
+        word_id[content[0]] = count
+        count += 1
+        content = [float(c) for c in content[1:]]
+        vec.append(content)
+    f.close()
+    word_id["BLANK"] = len(word_id)
+    vec = np.array(vec, dtype = np.float32)
+    # pdb.set_trace()
+    return (vec,word_id)
+#   there were two random vectors which i think is unecessary.
+
+
+def read_in_relations():
+    print('Now reading in Relationship ids!')
+    relation_id = {}
+    f = open("./origin_data/relation2id.txt")
+    while True:
+        content = f.readline()
+        if content == "":
+            break
+        content = content.strip().split()
+        relation_id[content[0]] = content[1]
+    return relation_id
+
+
+def read_in_train():
+    print("Now is time for reading the training data!")
+
+
+init()
