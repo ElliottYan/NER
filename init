@@ -4,8 +4,11 @@ import pdb
 
 
 def init():
+    fix_len = 60
     vec, word_id = read_in_word2vec()
     relation_id = read_in_relations()
+    train_mention = read_in(word_id, relation_id, fix_len, train_test="train")
+    test_mention = read_in(word_id, relation_id, fix_len, train_test="test")
 
 
 def pos_embed(x, lower, upper, fix_len):
@@ -16,7 +19,7 @@ def read_in_word2vec():
     print("Now reading Word_embeddings!")
     vec = []
     word_id = {}
-    f = open("./origin_data/vec.txt")
+    f = open(os.getcwd()+"/origin_data/vec.txt")
     f.readline()
     count = 0
     while True:
@@ -43,7 +46,7 @@ def read_in_word2vec():
 def read_in_relations():
     print('Now reading in Relationship ids!')
     relation_id = {}
-    f = open("./origin_data/relation2id.txt")
+    f = open(os.getcwd() + "./origin_data/relation2id.txt")
     while True:
         content = f.readline()
         if content == "":
@@ -53,11 +56,22 @@ def read_in_relations():
     return relation_id
 
 
-def read_in_train(word_id, relation_id, fix_len):
-    print("Now is time for reading the training data!")
-    f = open("./origin_data/train.txt")
-    train_sen = {}
-    train_ans = {}
+def read_in_data(func):
+    def call(*args, train_test="train"):
+        if train_test == "train":
+            f = open(os.getcwd() + "./origin_data/train.txt")
+        elif train_test == "test":
+            f = open(os.getcwd() + "./origin_data/test.txt")
+        else:
+            print("Wrong argument in calling read_in functions!")
+            return
+        print("Now is time for reading the " + train_test + " data!")
+        return func(*args, f)
+    return call
+
+@read_in_data
+def read_in(word_id, relation_id, fix_len, f):
+    mentions = {}
     n_relation = len(relation_id)
     while True:
         content = f.readline()
@@ -77,7 +91,7 @@ def read_in_train(word_id, relation_id, fix_len):
         # every tuple is a mentions-bag level object
 
         # Data Structure
-        #   train_sen :(tuple) -> labels -> embeddings
+        #   mentions :(tuple) -> labels -> embeddings
         #   label is one-hot
 
         # construct mentions-bag if not exist
@@ -85,12 +99,12 @@ def read_in_train(word_id, relation_id, fix_len):
         label[relation] = 1
 
         # if no such tuple appeared
-        if tup not in train_sen:
-            train_sen[tup] = {}
+        if tup not in mentions:
+            mentions[tup] = {}
 
         # if no such relation appeared
-        if label not in train_sen[tup].keys():
-            train_sen[tup][label] = []
+        if label not in mentions[tup].keys():
+            mentions[tup][label] = []
 
         sentence = content[5:-1]
         try:
@@ -111,8 +125,9 @@ def read_in_train(word_id, relation_id, fix_len):
             word = word_id[word]
             output.append([word, en1pos, en2pos])
 
-        train_sen[tup][label].append(output)
+        mentions[tup][label].append(output)
 
+    return mentions
 
 
 
