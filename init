@@ -8,6 +8,10 @@ def init():
     relation_id = read_in_relations()
 
 
+def pos_embed(x, lower, upper, fix_len):
+    return max(lower, min(x + fix_len, upper))
+
+
 def read_in_word2vec():
     print("Now reading Word_embeddings!")
     vec = []
@@ -25,7 +29,11 @@ def read_in_word2vec():
         content = [float(c) for c in content[1:]]
         vec.append(content)
     f.close()
+    dim = 50
     word_id["BLANK"] = len(word_id)
+    vec.append(np.random.normal(size=dim, loc=0, scale=0.05))
+    word_id["UNK"] = len(word_id)
+    vec.append(np.random.normal(size=dim, loc=0, scale=0.05))
     vec = np.array(vec, dtype = np.float32)
     # pdb.set_trace()
     return (vec,word_id)
@@ -45,8 +53,73 @@ def read_in_relations():
     return relation_id
 
 
-def read_in_train():
+def read_in_train(word_id, relation_id, fix_len):
     print("Now is time for reading the training data!")
+    f = open("./origin_data/train.txt")
+    train_sen = {}
+    train_ans = {}
+    n_relation = len(relation_id)
+    while True:
+        content = f.readline()
+        if content == "":
+            break
+        content = content.strip().split()
+        # in this case, the entity pair comes in with same order
+        en1 = content[3]
+        en2 = content[4]
+        tup = (en1, en2)
+        relation = 0
+        if content[4] not in relation_id:
+            relation = relation_id["NA"]
+        else:
+            relation = relation_id[content[4]]
+
+        # every tuple is a mentions-bag level object
+
+        # Data Structure
+        #   train_sen :(tuple) -> labels -> embeddings
+        #   label is one-hot
+
+        # construct mentions-bag if not exist
+        label = [0] * n_relation
+        label[relation] = 1
+
+        # if no such tuple appeared
+        if tup not in train_sen:
+            train_sen[tup] = {}
+
+        # if no such relation appeared
+        if label not in train_sen[tup].keys():
+            train_sen[tup][label] = []
+
+        sentence = content[5:-1]
+        try:
+            en1pos = sentence.index(en1)
+            en2pos = sentence.index(en2)
+        except:
+            print("Index error in sentence: " + sentence)
+
+        # construct the mentions in each bag
+        # with [word, en1pos, en2pos]
+        output = []
+        for i in range(min(fix_len, len(sentence))):
+            en1pos = pos_embed(i - en1pos, 0, fix_len * 2, fix_len)
+            en2pos = pos_embed(i - en2pos, 0, fix_len * 2, fix_len)
+            word = sentence[i]
+            if word not in word_id:
+                word = "UNK"
+            word = word_id[word]
+            output.append([word, en1pos, en2pos])
+
+        train_sen[tup][label].append(output)
+
+
+
+
+
+
+
+
 
 
 init()
