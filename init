@@ -46,22 +46,22 @@ def read_in_word2vec():
 def read_in_relations():
     print('Now reading in Relationship ids!')
     relation_id = {}
-    f = open(os.getcwd() + "./origin_data/relation2id.txt")
+    f = open(os.getcwd() + "/origin_data/relation2id.txt")
     while True:
         content = f.readline()
         if content == "":
             break
         content = content.strip().split()
-        relation_id[content[0]] = content[1]
+        relation_id[content[0]] = int(content[1])
     return relation_id
 
 
 def read_in_data(func):
     def call(*args, train_test="train"):
         if train_test == "train":
-            f = open(os.getcwd() + "./origin_data/train.txt")
+            f = open(os.getcwd() + "/origin_data/train.txt")
         elif train_test == "test":
-            f = open(os.getcwd() + "./origin_data/test.txt")
+            f = open(os.getcwd() + "/origin_data/test.txt")
         else:
             print("Wrong argument in calling read_in functions!")
             return
@@ -79,8 +79,8 @@ def read_in(word_id, relation_id, fix_len, f):
             break
         content = content.strip().split()
         # in this case, the entity pair comes in with same order
-        en1 = content[3]
-        en2 = content[4]
+        en1 = content[2]
+        en2 = content[3]
         tup = (en1, en2)
         relation = 0
         if content[4] not in relation_id:
@@ -95,24 +95,30 @@ def read_in(word_id, relation_id, fix_len, f):
         #   label is one-hot
 
         # construct mentions-bag if not exist
-        label = [0] * n_relation
-        label[relation] = 1
+
+        # label = [0] * n_relation
+        # label[relation] = 1
 
         # if no such tuple appeared
         if tup not in mentions:
             mentions[tup] = {}
 
         # if no such relation appeared
-        if label not in mentions[tup].keys():
-            mentions[tup][label] = []
+        if relation not in mentions[tup].keys():
+            mentions[tup][relation] = []
 
         sentence = content[5:-1]
         try:
             en1pos = sentence.index(en1)
+            pass1 = True
             en2pos = sentence.index(en2)
         except:
-            print("Index error in sentence: " + sentence)
-
+            # still need to solve this problem
+            # en1 , en2 format may not be like its mentions in sentence
+            if pass1 == True:
+                en2pos = 0
+            else:
+                en1pos = 0
         # construct the mentions in each bag
         # with [word, en1pos, en2pos]
         output = []
@@ -125,7 +131,7 @@ def read_in(word_id, relation_id, fix_len, f):
             word = word_id[word]
             output.append([word, en1pos, en2pos])
 
-        mentions[tup][label].append(output)
+        mentions[tup][relation].append(output)
 
     return mentions
 
