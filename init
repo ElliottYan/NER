@@ -140,6 +140,7 @@ def read_in(word_id, relation_id, fix_len, f):
 def save(func):
     def call(*args, train_test="train"):
         sentences, anses, targets = func(*args)
+        print("Saving all training and testing data!")
         np.save("./data/"+ train_test + "_sen.npy", sentences)
         np.save("./data/" + train_test + "_ans.npy", anses)
         np.save("./data/" + train_test + "_target.npy", targets)
