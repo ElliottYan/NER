@@ -10,7 +10,8 @@ def init():
     train_mention = read_in(word_id, relation_id, fix_len, train_test="train")
     test_mention = read_in(word_id, relation_id, fix_len, train_test="test")
     separate_save_in(train_mention, len(relation_id), train_test = "train")
-    separate_save_in(train_mention, len(relation_id), train_test="test")
+    separate_save_in(test_mention, len(relation_id), train_test="test", vec = vec)
+
 
 def pos_embed(x, lower, upper, fix_len):
     return max(lower, min(x + fix_len, upper))
@@ -71,6 +72,7 @@ def read_in_data(func):
         return results
     return call
 
+
 @read_in_data
 def read_in(word_id, relation_id, fix_len, f):
     mentions = {}
@@ -97,9 +99,6 @@ def read_in(word_id, relation_id, fix_len, f):
 
         # construct mentions-bag if not exist
 
-        # label = [0] * n_relation
-        # label[relation] = 1
-
         # if no such tuple appeared
         if tup not in mentions:
             mentions[tup] = {}
@@ -109,28 +108,33 @@ def read_in(word_id, relation_id, fix_len, f):
             mentions[tup][relation] = []
 
         sentence = content[5:-1]
+
+        # have to write two try-catch block for both entity position.
+
+        # still need to solve this problem
+        # en1 , en2 format may not be like its mentions in sentence
+        en1pos = en2pos = 0
         try:
             en1pos = sentence.index(en1)
-            pass1 = True
+        except ValueError:
+            pass
+        try:
             en2pos = sentence.index(en2)
-        except:
-            # still need to solve this problem
-            # en1 , en2 format may not be like its mentions in sentence
-            if pass1 == True:
-                en2pos = 0
-            else:
-                en1pos = 0
+        except ValueError:
+            pass
+
         # construct the mentions in each bag
-        # with [word, en1pos, en2pos]
-        output = []
+        # with [[word, rel_pos1, rel_pos2],....]
+        # first tuple is [relation, pos1, pos2], used for PCNN of sentence
+        output = [[relation, en1pos, en2pos],]
         for i in range(min(fix_len, len(sentence))):
-            en1pos = pos_embed(i - en1pos, 0, fix_len * 2, fix_len)
-            en2pos = pos_embed(i - en2pos, 0, fix_len * 2, fix_len)
+            rel_pos1 = pos_embed(i - en1pos, 0, fix_len * 2, fix_len)
+            rel_pos2 = pos_embed(i - en2pos, 0, fix_len * 2, fix_len)
             word = sentence[i]
             if word not in word_id:
                 word = "UNK"
             word = word_id[word]
-            output.append([word, en1pos, en2pos])
+            output.append([word, rel_pos1, rel_pos2])
 
         mentions[tup][relation].append(output)
 
@@ -138,13 +142,16 @@ def read_in(word_id, relation_id, fix_len, f):
 
 
 def save(func):
-    def call(*args, train_test="train"):
+    def call(*args, train_test="train", vec=None):
         sentences, anses, targets = func(*args)
-        print("Saving all training and testing data!")
+        msg = "Saving all" + train_test + "data!"
+        print(msg)
         np.save("./data/"+ train_test + "_sen.npy", sentences)
         np.save("./data/" + train_test + "_ans.npy", anses)
         np.save("./data/" + train_test + "_target.npy", targets)
+        np.save("./data/vec.npy", vec)
     return call
+
 
 @save
 def separate_save_in(sentence_bag, n_relation):
@@ -155,20 +162,14 @@ def separate_save_in(sentence_bag, n_relation):
         for relation, mentions in bag.items():
             for m in mentions:
                 # m here denotes a sentence
-                sentence_list.append(m)
-                ans_list.append(relation)
-                targets.append(pair)
+                sentence_list.append(np.array(m))
+            ans_list.append(relation)
+        targets.append(pair)
     sentence_list = np.array(sentence_list)
     ans_list = np.array(ans_list)
     targets = np.array(targets)
+    pdb.set_trace()
     return sentence_list, ans_list, targets
-
-
-
-
-
-
-
 
 
 init()
