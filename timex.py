@@ -181,7 +181,7 @@ def hashnum(number):
 def ground(tagged_text, base_date):
 
     # Find all identified timex and put them into a list
-    pdb.set_trace()
+    # pdb.set_trace()
     timex_regex = re.compile(r'<TIMEX2>.*?</TIMEX2>', re.DOTALL)
     timex_found = timex_regex.findall(tagged_text)
     timex_found = map(lambda timex:re.sub(r'</?TIMEX2.*?>', '', timex), \
