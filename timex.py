@@ -5,6 +5,7 @@ import re
 import string
 import os
 import sys
+import pdb
 
 # Requires eGenix.com mx Base Distribution
 # http://www.egenix.com/products/python/mxBase/
@@ -30,7 +31,7 @@ exp1 = "(before|after|earlier|later|ago)"
 exp2 = "(this|next|last)"
 iso = "\d+[/-]\d+[/-]\d+ \d+:\d+:\d+\.\d+"
 year = "((?<=\s)\d{4}|^\d{4})"
-my = "(month|year)"
+
 regxp1 = "((\d+|(" + numbers + "[-\s]?)+) " + dmy + "s? " + exp1 + ")"
 regxp2 = "(" + exp2 + " (" + dmy + "|" + week_day + "|" + month + "))"
 regxp3 = "(" + month + " \s" + year + ")"
@@ -75,6 +76,7 @@ def tag(text):
     for timex in found:
         timex_found.append(timex)
 
+    # month + year
     found = reg6.findall(text)
     for timex in found:
         timex_found.append(timex)
@@ -179,6 +181,7 @@ def hashnum(number):
 def ground(tagged_text, base_date):
 
     # Find all identified timex and put them into a list
+    pdb.set_trace()
     timex_regex = re.compile(r'<TIMEX2>.*?</TIMEX2>', re.DOTALL)
     timex_found = timex_regex.findall(tagged_text)
     timex_found = map(lambda timex:re.sub(r'</?TIMEX2.*?>', '', timex), \
@@ -256,18 +259,18 @@ def ground(tagged_text, base_date):
 
         # Month in the previous year.
         elif re.match(r'last ' + month, timex, re.IGNORECASE):
-            month = hashmonths[timex.split()[1]]
-            timex_val = str(base_date.year - 1) + '-' + str(month)
+            month_val = hashmonths[timex.split()[1]]
+            timex_val = str(base_date.year - 1) + '-' + str(month_val)
 
         # Month in the current year.
         elif re.match(r'this ' + month, timex, re.IGNORECASE):
-            month = hashmonths[timex.split()[1]]
-            timex_val = str(base_date.year) + '-' + str(month)
+            month_val = hashmonths[timex.split()[1]]
+            timex_val = str(base_date.year) + '-' + str(month_val)
 
         # Month in the following year.
         elif re.match(r'next ' + month, timex, re.IGNORECASE):
-            month = hashmonths[timex.split()[1]]
-            timex_val = str(base_date.year + 1) + '-' + str(month)
+            month_val = hashmonths[timex.split()[1]]
+            timex_val = str(base_date.year + 1) + '-' + str(month_val)
         elif re.match(r'last month', timex, re.IGNORECASE):
 
             # Handles the year boundary.
@@ -320,22 +323,22 @@ def ground(tagged_text, base_date):
 
             # Calculate new values for the year and the month.
             year = str(base_date.year - offset // 12 - extra)
-            month = str((base_date.month - offset % 12) % 12)
+            month_val = str((base_date.month - offset % 12) % 12)
 
             # Fix for the special case.
-            if month == '0':
-                month = '12'
-            timex_val = year + '-' + month
+            if month_val == '0':
+                month_val = '12'
+            timex_val = year + '-' + month_val
         elif re.match(r'\d+ months? (later|after)', timex, re.IGNORECASE):
             extra = 0
             offset = int(re.split(r'\s', timex)[0])
             if (base_date.month + offset % 12) > 12:
                 extra = 1
             year = str(base_date.year + offset // 12 + extra)
-            month = str((base_date.month + offset % 12) % 12)
-            if month == '0':
-                month = '12'
-            timex_val = year + '-' + month
+            month_val = str((base_date.month + offset % 12) % 12)
+            if month_val == '0':
+                month_val = '12'
+            timex_val = year + '-' + month_val
         elif re.match(r'\d+ years? (ago|earlier|before)', timex, re.IGNORECASE):
             offset = int(re.split(r'\s', timex)[0])
             timex_val = str(base_date.year - offset)
@@ -360,9 +363,11 @@ def demo():
     import nltk
     text = nltk.corpus.abc.raw('rural.txt')[:10000]
     tged_text = tag(text)
-    print(tged_text)
+    # print(tged_text)
     print("-"*10)
-    print(ground(tged_text, mx.DateTime.Date(2005,11,10)))
+    print("-" * 10)
+    print(ground(tged_text, Date(2005,11,10)))
+
 
 
 if __name__ == '__main__':
