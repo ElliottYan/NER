@@ -1,6 +1,8 @@
 # Code for tagging temporal expressions in text
 # For details of the TIMEX format, see http://timex2.mitre.org/
 
+# This only works in py2 virtual env.
+
 import re
 import string
 import os
@@ -178,6 +180,8 @@ def hashnum(number):
 
 # Given a timex_tagged_text and a Date object set to base_date,
 # returns timex_grounded_text
+
+# Not very cool for previous version, month variable is re-used and cause some problems.
 def ground(tagged_text, base_date):
 
     # Find all identified timex and put them into a list
