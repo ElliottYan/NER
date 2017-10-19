@@ -26,7 +26,8 @@ numbers = "(^a(?=\s)|one|two|three|four|five|six|seven|eight|nine|ten| \
 day = "(monday|tuesday|wednesday|thursday|friday|saturday|sunday)"
 week_day = "(monday|tuesday|wednesday|thursday|friday|saturday|sunday)"
 month = "(january|february|march|april|may|june|july|august|september| \
-          october|november|december)"
+          october|november|december|jan|feb|mar|apr|aug|sept|oct|nov|dec)"
+# need some abbreviation for month
 dmy = "(year|day|week|month)"
 rel_day = "(today|yesterday|tomorrow|tonight|tonite)"
 exp1 = "(before|after|earlier|later|ago)"
@@ -36,14 +37,18 @@ year = "((?<=\s)\d{4}|^\d{4})"
 
 regxp1 = "((\d+|(" + numbers + "[-\s]?)+) " + dmy + "s? " + exp1 + ")"
 regxp2 = "(" + exp2 + " (" + dmy + "|" + week_day + "|" + month + "))"
-regxp3 = "(" + month + " \s" + year + ")"
+# match month and month_abbrev with comma or space in between.
+regxp3 = "(\d{0,2}[,\s]*" + month + "[,\s]*" + year + ")"
+
+# for time expression like 19 June, 1999
+# regxp4 =
 
 reg1 = re.compile(regxp1, re.IGNORECASE)
 reg2 = re.compile(regxp2, re.IGNORECASE)
 reg3 = re.compile(rel_day, re.IGNORECASE)
 reg4 = re.compile(iso)
-reg5 = re.compile(year)
-reg6 = re.compile(regxp3, re.IGNORECASE)
+# reg5 = re.compile(year)
+reg5 = re.compile(regxp3, re.IGNORECASE)
 
 def tag(text):
 
@@ -73,20 +78,22 @@ def tag(text):
     for timex in found:
         timex_found.append(timex)
 
-    # Year
-    found = reg5.findall(text)
-    for timex in found:
-        timex_found.append(timex)
+    # # Year
+    # found = reg5.findall(text)
+    # for timex in found:
+    #     timex_found.append(timex)
 
-    # month + year
-    found = reg6.findall(text)
+    # reg5 replaced by month + year
+    found = reg5.findall(text)
     for timex in found:
         timex_found.append(timex)
 
     # Tag only temporal expressions which haven't been tagged.
     for timex in timex_found:
-        text = re.sub(timex + '(?!</TIMEX2>)', '<TIMEX2>' + timex + '</TIMEX2>', text)
-
+        try:
+            text = re.sub(timex + '(?!</TIMEX2>)', '<TIMEX2>' + timex + '</TIMEX2>', text)
+        except:
+            text = re.sub(timex[0] + '(?!</TIMEX2>)', '<TIMEX2>' + timex[0] + '</TIMEX2>', text)
     return text
 
 # Hash function for week days to simplify the grounding task.
@@ -350,6 +357,11 @@ def ground(tagged_text, base_date):
             offset = int(re.split(r'\s', timex)[0])
             timex_val = str(base_date.year + offset)
 
+        elif re.match(regxp3, timex, re.IGNORECASE):
+
+            exp = re.split(r'[,\s]*', timex)
+            timex_val = str(exp[1] + "-" + hashmonths(exp[0]))
+
         # Remove 'time' from timex_val.
         # For example, If timex_val = 2000-02-20 12:23:34.45, then
         # timex_val = 2000-02-20
@@ -363,11 +375,11 @@ def ground(tagged_text, base_date):
 
 ####
 
+
 def demo():
     import nltk
     text = nltk.corpus.abc.raw('rural.txt')[:10000]
     tged_text = tag(text)
-    # print(tged_text)
     print("-"*10)
     print("-" * 10)
     print(ground(tged_text, Date(2005,11,10)))

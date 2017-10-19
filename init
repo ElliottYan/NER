@@ -5,31 +5,44 @@ import timex
 
 
 def extract_timex():
+    # tagging the <TIMEX> tag.
     f1 = open(os.getcwd() + "/origin_data/train.txt","r")
     f2 = open(os.getcwd() + "/origin_data/test.txt",'r')
-    fin = f1
     f3 = open(os.getcwd() + "/origin_data/train_time.txt","w")
     f4 = open(os.getcwd() + "/origin_data/test_time.txt","w")
+    fin = f1
     fo = f3
     finish = 0
     count = 0
     while(True):
         content = fin.readline()
-        if content == "" and finish == 0:
-            finish = 1
-            fin = f2
-            fo = f4
-        elif content == "" and finish == 1:
-            break
         content = content.split()
         new_cont = " ".join(content[5:])
         new_content = timex.tag(new_cont)
-        # pdb.set_trace()
+        # new_content = timex.ground(new_content)
+        pdb.set_trace()
         # new_content = timex.tag(str(content[5:]))
         fo.write(" ".join(content[:5] + new_content.split()) + "\n")
         count += 1
-        if(count%500 == 0):
+        if(count % 500 == 0):
             print("Now is in " + str(count) + " iteration!")
+
+    # replace <TIMEX> tag for time val
+    # f1 = open(os.getcwd() + "/origin_data/train_time.txt","r")
+    # f2 = open(os.getcwd() + "/origin_data/test_time.txt",'r')
+    # f3 = open(os.getcwd() + "/origin_data/train_tval.txt","w")
+    # f4 = open(os.getcwd() + "/origin_data/test_tval.txt","w")
+    # fin = f1
+    # fo = f3
+    # finish = 0
+    # while(True):
+    #     content = fin.readline()
+    #     if content == "" and finish == 0:
+    #         finish = 1
+    #         fin = f2
+    #         fo = f4
+    #     elif content == "" and finish == 1:
+    #         break
 
 
 def init():
