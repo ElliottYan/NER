@@ -111,23 +111,23 @@ def read_in_relations():
 
 
 def read_in_data(func):
-    def call(*args, train_test="train"):
-        if train_test == "train":
+    def call(*args, **kwargs):
+        if kwargs["train_test"] == "train":
             f = open(os.getcwd() + "/origin_data/train.txt")
-        elif train_test == "test":
+        elif kwargs["train_test"] == "test":
             f = open(os.getcwd() + "/origin_data/test.txt")
         else:
             print("Wrong argument in calling read_in functions!")
             return
-        print("Now is time for reading the " + train_test + " data!")
-        results = func(*args, f)
+        print("Now is time for reading the " + kwargs["train_test"] + " data!")
+        results = func(f, *args)
         f.close()
         return results
     return call
 
 
 @read_in_data
-def read_in(word_id, relation_id, fix_len, f):
+def read_in(f, word_id, relation_id, fix_len):
     mentions = {}
     n_relation = len(relation_id)
     while True:
@@ -195,14 +195,14 @@ def read_in(word_id, relation_id, fix_len, f):
 
 
 def save(func):
-    def call(*args, train_test="train", vec=None):
+    def call(*args, **kwargs):
         sentences, anses, targets = func(*args)
-        msg = "Saving all" + train_test + "data!"
+        msg = "Saving all" + kwargs["train_test"] + "data!"
         print(msg)
-        np.save("./data/"+ train_test + "_sen.npy", sentences)
-        np.save("./data/" + train_test + "_ans.npy", anses)
-        np.save("./data/" + train_test + "_target.npy", targets)
-        np.save("./data/vec.npy", vec)
+        np.save("./data/"+ kwargs["train_test"] + "_sen.npy", sentences)
+        np.save("./data/" + kwargs["train_test"] + "_ans.npy", anses)
+        np.save("./data/" + kwargs["train_test"] + "_target.npy", targets)
+        np.save("./data/vec.npy", kwargs["vec"])
     return call
 
 

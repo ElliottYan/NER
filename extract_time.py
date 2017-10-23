@@ -1,6 +1,9 @@
-import origin_data.riedel.Document_pb2 as Document_pb
+from __future__ import absolute_import
+from origin_data.riedel import Document_pb2
 import os
 import timex
+import pdb
+
 
 def main():
     data_path = "./origin_data/riedel/"
@@ -8,7 +11,7 @@ def main():
     with open(output_path + "processed.txt") as fout:
         for item in os.listdir(data_path):
             with open(data_path + item) as fin:
-                doc = Document_pb.Document()
+                doc = Document_pb2.Document()
                 doc.parseFromString(fin.read())
                 # whole_doc is for time extraction
                 whole_doc = []
@@ -31,6 +34,7 @@ def main():
                         valid_set.append(s)
                     whole_doc.append(s)
                 timex_found ,whole_doc = timex.tag(" ".join(whole_doc))
+                pdb.set_trace()
 
 
 
