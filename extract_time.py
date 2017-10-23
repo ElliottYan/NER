@@ -11,6 +11,8 @@ def main():
     with open(output_path + "processed.txt", "wb") as fout:
         for item in os.listdir(data_path):
             with open(data_path + item, "rb") as fin:
+                if item[-3:] != ".pb":
+                    continue
                 pdb.set_trace()
                 doc = Document_pb2.Document()
                 doc.ParseFromString(fin.read())
