@@ -6,7 +6,7 @@ import pdb
 
 
 def main():
-    data_path = "./origin_data/riedel/nyt-2005-2006.backup"
+    data_path = "./origin_data/riedel/nyt-2005-2006.backup/"
     output_path = "./data/"
     with open(output_path + "processed.txt", "wb") as fout:
         for item in os.listdir(data_path):
