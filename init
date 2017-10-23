@@ -16,11 +16,21 @@ def extract_timex():
     count = 0
     while(True):
         content = fin.readline()
+        if content == "" and finish == 0:
+            finish = 1
+            fin.close()
+            fo.close()
+            fin = f2
+            fo = f4
+        elif content == "" and finish == 1:
+            fin.close()
+            fo.close()
+            break
         content = content.split()
         new_cont = " ".join(content[5:])
         new_content = timex.tag(new_cont)
         # new_content = timex.ground(new_content)
-        pdb.set_trace()
+        # pdb.set_trace()
         # new_content = timex.tag(str(content[5:]))
         fo.write(" ".join(content[:5] + new_content.split()) + "\n")
         count += 1
@@ -35,14 +45,15 @@ def extract_timex():
     # fin = f1
     # fo = f3
     # finish = 0
-    # while(True):
-    #     content = fin.readline()
-    #     if content == "" and finish == 0:
-    #         finish = 1
-    #         fin = f2
-    #         fo = f4
-    #     elif content == "" and finish == 1:
-    #         break
+
+    while(True):
+        content = fin.readline()
+        if content == "" and finish == 0:
+            finish = 1
+            fin = f2
+            fo = f4
+        elif content == "" and finish == 1:
+            break
 
 
 def init():

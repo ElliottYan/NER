@@ -38,7 +38,8 @@ year = "((?<=\s)\d{4}|^\d{4})"
 regxp1 = "((\d+|(" + numbers + "[-\s]?)+) " + dmy + "s? " + exp1 + ")"
 regxp2 = "(" + exp2 + " (" + dmy + "|" + week_day + "|" + month + "))"
 # match month and month_abbrev with comma or space in between.
-regxp3 = "(\d{0,2}[,\s]*" + month + "[,\s]*" + year + ")"
+# This reg expression can catch form of explicit day or month or year.
+regxp3 = "(" + month + "?\s*\d{0,2}[,\s]*" + year + ")"
 
 # for time expression like 19 June, 1999
 # regxp4 =
@@ -94,7 +95,7 @@ def tag(text):
             text = re.sub(timex + '(?!</TIMEX2>)', '<TIMEX2>' + timex + '</TIMEX2>', text)
         except:
             text = re.sub(timex[0] + '(?!</TIMEX2>)', '<TIMEX2>' + timex[0] + '</TIMEX2>', text)
-    return text
+    return timex_found, text
 
 # Hash function for week days to simplify the grounding task.
 # [Mon..Sun] -> [0..6]
@@ -379,7 +380,7 @@ def ground(tagged_text, base_date):
 def demo():
     import nltk
     text = nltk.corpus.abc.raw('rural.txt')[:10000]
-    tged_text = tag(text)
+    timex_found, tged_text = tag(text)
     print("-"*10)
     print("-" * 10)
     print(ground(tged_text, Date(2005,11,10)))
