@@ -12,7 +12,7 @@ def main():
         for item in os.listdir(data_path):
             with open(data_path + item, "rb") as fin:
                 doc = Document_pb2.Document()
-                doc.parseFromString(fin.read())
+                doc.ParseFromString(fin.read())
                 # whole_doc is for time extraction
                 whole_doc = []
                 valid_set = []
