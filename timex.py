@@ -39,7 +39,8 @@ regxp1 = "((\d+|(" + numbers + "[-\s]?)+) " + dmy + "s? " + exp1 + ")"
 regxp2 = "(" + exp2 + " (" + dmy + "|" + week_day + "|" + month + "))"
 # match month and month_abbrev with comma or space in between.
 # This reg expression can catch form of explicit day or month or year.
-regxp3 = "(" + month + "?\s*\d{0,2}[,\s]*" + year + ")"
+# e.g. Februray 18th, 2005
+regxp3 = "(" + month + "?\s*\d{0,2}[a-z,\s]*" + year + ")"
 
 # for time expression like 19 June, 1999
 # regxp4 =
@@ -361,7 +362,7 @@ def ground(tagged_text, base_date):
         elif re.match(regxp3, timex, re.IGNORECASE):
 
             exp = re.split(r'[,\s]*', timex)
-            timex_val = str(exp[1] + "-" + hashmonths(exp[0]))
+            timex_val = str(exp[1] + "-" + hashmonths[exp[0]])
 
         # Remove 'time' from timex_val.
         # For example, If timex_val = 2000-02-20 12:23:34.45, then
@@ -376,8 +377,14 @@ def ground(tagged_text, base_date):
 
 ####
 
+def retrieve_Date_time(timex):
+    re.match()
+
 
 def demo():
+    s = "February 18th, 2005 "
+    print(reg5.findall(s))
+
     import nltk
     text = nltk.corpus.abc.raw('rural.txt')[:10000]
     timex_found, tged_text = tag(text)

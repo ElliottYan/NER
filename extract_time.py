@@ -9,11 +9,12 @@ def main():
     data_path = "./origin_data/riedel/nyt-2005-2006.backup/"
     output_path = "./data/"
     with open(output_path + "processed.txt", "wb") as fout:
+        outputs = []
         for item in os.listdir(data_path):
             with open(data_path + item, "rb") as fin:
                 if item[-3:] != ".pb":
                     continue
-                pdb.set_trace()
+                # pdb.set_trace()
                 doc = Document_pb2.Document()
                 doc.ParseFromString(fin.read())
                 # whole_doc is for time extraction
@@ -33,10 +34,11 @@ def main():
 
                     s = " ".join(s)
                     # if mentions is smaller than 2, means this may not in my train-test set.
+                    # in this case, the mention could be bigger than 2, so we may need iterations for further processing.
                     if len(m) < 2:
-                        valid_set.append(s)
+                        valid_set.append([m, s])
                     whole_doc.append(s)
-                timex_found ,whole_doc = timex.tag(" ".join(whole_doc))
+                timex_found, whole_doc = timex.tag(" ".join(whole_doc))
                 pdb.set_trace()
 
 
