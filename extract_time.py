@@ -8,9 +8,9 @@ import pdb
 def main():
     data_path = "./origin_data/riedel/"
     output_path = "./data/"
-    with open(output_path + "processed.txt") as fout:
+    with open(output_path + "processed.txt", "wb") as fout:
         for item in os.listdir(data_path):
-            with open(data_path + item) as fin:
+            with open(data_path + item, "rb") as fin:
                 doc = Document_pb2.Document()
                 doc.parseFromString(fin.read())
                 # whole_doc is for time extraction
