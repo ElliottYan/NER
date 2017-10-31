@@ -117,6 +117,7 @@ def entities(prefix, properties):
     entity = []
 
     for prop in properties['property']:
+        print(prop)
         query = start + "?entity1 p:" + prop + " ?statement.\n" + "?statement ps:" + prop + " ?entity2.\n" + end
         response = requests.get(url, params={'query':query, 'format':'json'}).json()
         for item in response['results']['bindings']:
@@ -134,7 +135,8 @@ def entities(prefix, properties):
 
 
 if __name__ == "__main__":
-    properties = save_properties(prefix)
+    # properties = save_properties(prefix)
+    properties = pd.read_csv("./origin_data/properties")
     entities(prefix, properties)
 
 
