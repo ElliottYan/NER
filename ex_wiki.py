@@ -95,10 +95,6 @@ def save_properties(prefix):
     return properties
 
 
-
-
-
-
 def entities(prefix, properties):
     start = prefix + '''SELECT ?entity1 ?entity1Label ?entity2 ?entity2Label ?start ?end WHERE {
       SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }'''
@@ -119,7 +115,7 @@ def entities(prefix, properties):
     for prop in properties['property']:
         print(prop)
         query = start + "?entity1 p:" + prop + " ?statement.\n" + "?statement ps:" + prop + " ?entity2.\n" + end
-        response = requests.get(url, params={'query':query, 'format':'json'}).json()
+        response = requests.get(url, params={'query':query, 'format':'json'}, timeout = 3).json()
         for item in response['results']['bindings']:
             entity.append({
                 'entity1':item['entity1'],
