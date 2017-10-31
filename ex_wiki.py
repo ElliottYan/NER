@@ -124,6 +124,9 @@ def entities(prefix, properties):
         except requests.exceptions.ReadTimeout:
             print('Passed!')
             continue
+        except:
+            pdb.set_trace()
+            continue
         for item in response['results']['bindings']:
             entity.append({
                 'relation': prop,
