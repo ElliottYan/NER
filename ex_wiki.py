@@ -82,6 +82,7 @@ def save_properties(prefix):
     for tps in time_properties:
         for item in tps['results']['bindings']:
             properties.append({
+                'url':item['property'],
                 'property':item['property']['value'].split('/')[-1],
                 'name':item['propertyLabel']['value']
             })
@@ -112,27 +113,29 @@ def entities(prefix, properties):
 
     entity = []
 
-    for prop in properties['property']:
+    # got for loop of each row
+    for i in range(properties.shape[0]):
+        prop = properties.iloc[i]['property']
+        prop_name = properties.iloc[i]['name']
         print(prop)
         query = start + "?entity1 p:" + prop + " ?statement.\n" + "?statement ps:" + prop + " ?entity2.\n" + end
         try:
-            response = requests.get(url, params={'query':query, 'format':'json'}, timeout = 3).json()
+            response = requests.get(url, params={'query':query, 'format':'json'}, timeout=2).json()
         except requests.exceptions.ReadTimeout:
             continue
         for item in response['results']['bindings']:
             entity.append({
-                'relation':prop,
-                'entity1':item['entity1'],
-                'entity1Label':item['entity1Label'],
-                'entity2':item['entity2'],
-                'entity2Label':item['entity2Label'],
-                'start_time':item.get('start'),
-                'end_time':item.get('end')
+                'relation': prop,
+                'entity1': item['entity1']['value'],
+                'entity1Label': item['entity1Label']['value'],
+                'entity2': item['entity2']['value'],
+                'entity2Label': item['entity2Label']['value'],
+                'start_time': item['start']['value'] if item.get('start') else None,
+                'end_time': item['end']['value'] if item.get('end') else None
             })
     entity = pd.DataFrame(entity)
-
     pdb.set_trace()
-
+    return entity
 
 if __name__ == "__main__":
     # properties = save_properties(prefix)
