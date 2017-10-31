@@ -1,4 +1,3 @@
-import urllib2
 import requests
 # import helpers
 import pdb
@@ -108,10 +107,10 @@ def entities(prefix, properties):
         }
       FILTER(BOUND(?start) || BOUND(?end)).
     }
-    LIMIT 100
+    LIMIT 10
     '''
-
     entity = []
+    undo_list = []
 
     # got for loop of each row
     for i in range(properties.shape[0]):
@@ -120,16 +119,16 @@ def entities(prefix, properties):
         print(prop)
         query = start + "?entity1 p:" + prop + " ?statement.\n" + "?statement ps:" + prop + " ?entity2.\n" + end
         try:
-            response = requests.get(url, params={'query': query, 'format': 'json'}, timeout=2).json()
-        except requests.exceptions.ReadTimeout:
-            print('Passed!')
-            continue
+            response = requests.get(url, params={'query': query, 'format': 'json'}, timeout=5).json()
         except:
-            pdb.set_trace()
+            # pdb.set_trace()
+            print('Passed!')
+            undo_list.append(prop)
             continue
         for item in response['results']['bindings']:
             entity.append({
                 'relation': prop,
+                'relation_name': prop_name,
                 'entity1': item['entity1']['value'],
                 'entity1Label': item['entity1Label']['value'],
                 'entity2': item['entity2']['value'],
@@ -138,7 +137,12 @@ def entities(prefix, properties):
                 'end_time': item['end']['value'] if item.get('end') else None
             })
     entity = pd.DataFrame(entity)
-    pdb.set_trace()
+    with open("./origin_data/entities.csv", 'w') as f:
+        entity.to_csv(f, encoding='utf-8')
+    with open("./origin_data/undo.txt", 'w') as f:
+        for item in undo_list:
+            f.write(item + '\n')
+    # pdb.set_trace()
     return entity
 
 
