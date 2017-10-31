@@ -31,14 +31,18 @@ def main():
                     for mention in sentence.mentions:
                         # mention got entity_name, mform, to
                         m.append(["_".join(s[int(mention.mfrom):int(mention.to+1)]), mention.mfrom, mention.to])
-
-                    s = " ".join(s)
                     # if mentions is smaller than 2, means this may not in my train-test set.
                     # in this case, the mention could be bigger than 2, so we may need iterations for further processing.
                     if len(m) < 2:
                         valid_set.append([m, s])
                     whole_doc.append(s)
+                # tagging op should appear in each doc iter
+                # since we need the whole doc to set base-time
                 timex_found, whole_doc = timex.tag(" ".join(whole_doc))
+                if len(timex_found) > 0:
+                    # set base-time tobe the last time found.
+                    base_t = timex.retrieve_Date_time(timex_found)
+
                 pdb.set_trace()
 
 

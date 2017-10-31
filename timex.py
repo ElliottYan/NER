@@ -377,8 +377,12 @@ def ground(tagged_text, base_date):
 
 ####
 
-def retrieve_Date_time(timex):
-    re.match()
+def retrieve_Date_time(timex_found):
+    # reverse order. The last shown timex is preferred.
+
+    # for t in timex_foun
+
+    return
 
 
 def demo():
