@@ -121,6 +121,7 @@ def entities(prefix, properties):
             continue
         for item in response['results']['bindings']:
             entity.append({
+                'relation':prop,
                 'entity1':item['entity1'],
                 'entity1Label':item['entity1Label'],
                 'entity2':item['entity2'],
