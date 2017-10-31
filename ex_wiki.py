@@ -115,7 +115,10 @@ def entities(prefix, properties):
     for prop in properties['property']:
         print(prop)
         query = start + "?entity1 p:" + prop + " ?statement.\n" + "?statement ps:" + prop + " ?entity2.\n" + end
-        response = requests.get(url, params={'query':query, 'format':'json'}, timeout = 3).json()
+        try:
+            response = requests.get(url, params={'query':query, 'format':'json'}, timeout = 3).json()
+        except requests.exceptions.ReadTimeout:
+            continue
         for item in response['results']['bindings']:
             entity.append({
                 'entity1':item['entity1'],
