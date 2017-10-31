@@ -120,8 +120,9 @@ def entities(prefix, properties):
         print(prop)
         query = start + "?entity1 p:" + prop + " ?statement.\n" + "?statement ps:" + prop + " ?entity2.\n" + end
         try:
-            response = requests.get(url, params={'query':query, 'format':'json'}, timeout=2).json()
+            response = requests.get(url, params={'query': query, 'format': 'json'}, timeout=2).json()
         except requests.exceptions.ReadTimeout:
+            print('Passed!')
             continue
         for item in response['results']['bindings']:
             entity.append({
@@ -137,10 +138,11 @@ def entities(prefix, properties):
     pdb.set_trace()
     return entity
 
+
 if __name__ == "__main__":
     # properties = save_properties(prefix)
     properties = pd.read_csv("./origin_data/properties")
-    entities(prefix, properties)
+    entity = entities(prefix, properties)
 
 
 # pdb.set_trace()
