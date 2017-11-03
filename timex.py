@@ -40,7 +40,9 @@ regxp2 = "(" + exp2 + " (" + dmy + "|" + week_day + "|" + month + "))"
 # match month and month_abbrev with comma or space in between.
 # This reg expression can catch form of explicit day or month or year.
 # e.g. Februray 18th, 2005
-regxp3 = "(" + month + "?\s*\d{0,2}[a-z,\s]*" + year + ")"
+regxp3 = "(" + month + "\s*(\d{1,2})+[a-z,\s]*" + year + ")"
+regxp4 = "(" + month + "\s*" + year + ")"
+regxp5 = "(" + year + ")"
 
 # for time expression like 19 June, 1999
 # regxp4 =
@@ -50,12 +52,17 @@ reg2 = re.compile(regxp2, re.IGNORECASE)
 reg3 = re.compile(rel_day, re.IGNORECASE)
 reg4 = re.compile(iso)
 # reg5 = re.compile(year)
+# month, day, year
 reg5 = re.compile(regxp3, re.IGNORECASE)
+# month, year
+reg6 = re.compile(regxp4, re.IGNORECASE)
+# year
+reg7 = re.compile(regxp5, re.IGNORECASE)
 
 def tag(text):
-
     # Initialization
     timex_found = []
+    real_Date = []
 
     # re.findall() finds all the substring matches, keep only the full
     # matching string. Captures expressions such as 'number of days' ago, etc.
@@ -89,6 +96,17 @@ def tag(text):
     found = reg5.findall(text)
     for timex in found:
         timex_found.append(timex)
+        real_Date.append(timex)
+
+    found = reg6.findall(text)
+    for timex in found:
+        timex_found.append(timex)
+        real_Date.append(timex)
+
+    found = reg7.findall(text)
+    for timex in found:
+        timex_found.append(timex)
+        real_Date.append(timex)
 
     # Tag only temporal expressions which haven't been tagged.
     for timex in timex_found:
@@ -96,7 +114,7 @@ def tag(text):
             text = re.sub(timex + '(?!</TIMEX2>)', '<TIMEX2>' + timex + '</TIMEX2>', text)
         except:
             text = re.sub(timex[0] + '(?!</TIMEX2>)', '<TIMEX2>' + timex[0] + '</TIMEX2>', text)
-    return timex_found, text
+    return real_Date, text
 
 # Hash function for week days to simplify the grounding task.
 # [Mon..Sun] -> [0..6]
@@ -386,16 +404,21 @@ def ground(tagged_text, base_date):
     return tagged_text
 
 
-def retrieve_Date_time(timex_found):
+# Got the base_date for each document.
+def retrieve_date_time(real_date):
     # reverse order. The last shown timex is preferred.
-    for t in timex_found.reverse():
-        if reg5.match(t):
-            t_split = re.split('\s+', t)
-            if(len(t_split) >= 2):
-                base_data = mx.DateTime.DateTime(int(t_split[-1]), hashmonths[-2])
+    pdb.set_trace()
+    if len(real_date) == 0:
+        return None
+    real_date.reverse()
+    for t in real_date:
+            if len(t) == 4:
+                base_date = DateTime(int(t[-1]), hashmonths[t[-2]], day=int(t[-3]))
+            elif len(t) == 3:
+                base_date = DateTime(int(t[-1]), hashmonths[t[-2]])
             else:
-                base_data = mx.DateTime.DateTime(int(t_split[0]))
-            return base_data
+                base_date = DateTime(int(t[-1]))
+            return base_date
     return None
 
 
@@ -407,12 +430,11 @@ def demo():
     text = nltk.corpus.abc.raw('rural.txt')[:10000]
     timex_found, tged_text = tag(text)
     print(1)
-    pdb.set_trace()
-    ret_date = retrieve_Date_time(timex_found)
+    # pdb.set_trace()
+    ret_date = retrieve_date_time(timex_found)
     print("-"*10)
     print("-" * 10)
     print(ret_date)
-
 
 
 if __name__ == '__main__':
