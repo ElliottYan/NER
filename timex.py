@@ -123,7 +123,17 @@ hashmonths = {
     'September': 9,
     'October': 10,
     'November': 11,
-    'December': 12}
+    'December': 12,
+    'Jan': 1,
+    'Feb': 2,
+    'Mar': 3,
+    'Apr': 4,
+    'Aug': 8,
+    'Sept': 9,
+    'Oct': 10,
+    'Nov': 11,
+    'Dec': 12,
+}
 
 # Hash number in words into the corresponding integer value
 def hashnum(number):
@@ -375,14 +385,18 @@ def ground(tagged_text, base_date):
 
     return tagged_text
 
-####
 
 def retrieve_Date_time(timex_found):
     # reverse order. The last shown timex is preferred.
-
-    # for t in timex_foun
-
-    return
+    for t in timex_found.reverse():
+        if reg5.match(t):
+            t_split = re.split('\s+', t)
+            if(len(t_split) >= 2):
+                base_data = mx.DateTime.DateTime(int(t_split[-1]), hashmonths[-2])
+            else:
+                base_data = mx.DateTime.DateTime(int(t_split[0]))
+            return base_data
+    return None
 
 
 def demo():
@@ -392,9 +406,11 @@ def demo():
     import nltk
     text = nltk.corpus.abc.raw('rural.txt')[:10000]
     timex_found, tged_text = tag(text)
+    print(1)
+    ret_date = retrieve_Date_time(timex_found)
     print("-"*10)
     print("-" * 10)
-    print(ground(tged_text, Date(2005,11,10)))
+    print(ret_date)
 
 
 

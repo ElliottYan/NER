@@ -1,9 +1,8 @@
-from __future__ import absolute_import
-from origin_data.riedel import Document_pb2
+# from origin_data.riedel import Document_pb2
 import os
 import timex
 import pdb
-
+import timex
 
 # Now we need to process wikipedia text for timex extraction
 def main():
@@ -47,14 +46,24 @@ def main():
                 pdb.set_trace()
 
 
-
-
-
-
-
-
-
+def parse_wiki():
+    data_path = "../wiki-data/"
+    out_path = "../wiki-taged-data/"
+    dirs = os.listdir(data_path)
+    count = 0
+    for dir in dirs:
+        path = data_path + dir + "/"
+        for files in os.listdir(path):
+            count += 1
+            with open(path + files, "r") as f:
+                text = f.read()
+                timex_found, taged_text = timex.tag(text)
+            with open(out_path + dir + "_" +files, 'w') as fout:
+                fout.write(taged_text)
+            # if count >= 10:
+            #     return
 
 
 if __name__ == "__main__":
-    main()
+    # main()
+    parse_wiki()
