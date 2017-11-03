@@ -5,6 +5,7 @@ import timex
 import pdb
 
 
+# Now we need to process wikipedia text for timex extraction
 def main():
     data_path = "./origin_data/riedel/nyt-2005-2006.backup/"
     output_path = "./data/"
