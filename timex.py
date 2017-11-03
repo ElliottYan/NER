@@ -407,6 +407,7 @@ def demo():
     text = nltk.corpus.abc.raw('rural.txt')[:10000]
     timex_found, tged_text = tag(text)
     print(1)
+    pdb.set_trace()
     ret_date = retrieve_Date_time(timex_found)
     print("-"*10)
     print("-" * 10)
