@@ -1,0 +1,105 @@
+,name,property
+0,official language,P37
+1,currency,P38
+2,position held,P39
+3,member of political party,P102
+4,military rank,P410
+5,member of,P463
+6,residence,P551
+7,exhibition history,P608
+8,record held,P1000
+9,capital of,P1376
+10,exploitation visa number,P2755
+11,charted in,P2291
+12,operating income,P3362
+13,chief operating officer,P1789
+14,head of state,P35
+15,spouse,P26
+16,head of government,P6
+17,stock exchange,P414
+18,place of detention,P2632
+19,adjacent station,P197
+20,curator,P1640
+21,country,P17
+23,corporate officer,P2828
+25,heritage designation,P1435
+26,Telegram username,P3789
+27,stepparent,P3448
+28,musical conductor,P3300
+29,VKontakte username,P3185
+30,marriageable age,P3000
+31,GCatholic church ID,P2971
+32,professional name (Japan),P2838
+33,Czech neighbourhood ID code,P2788
+34,INSEE department code,P2586
+35,INSEE region code,P2585
+36,INSEE canton code,P2506
+37,LinkedIn personal profile URL,P2035
+38,Facebook profile ID,P2013
+39,Twitter username,P2002
+40,Instagram username,P2003
+41,RSL editions,P1973
+43,number of representatives in an organization/legislature,P1410
+44,ranking,P1352
+45,number of seats,P1342
+46,quantity,P1114
+47,rector,P1075
+48,student of,P1066
+49,relative,P1038
+50,location,P276
+51,website account on,P553
+52,official website,P856
+53,significant event,P793
+54,military designation,P798
+55,professorship,P803
+56,OKTMO ID,P764
+57,given name,P735
+58,candidate,P726
+59,OKATO ID,P721
+60,inventory number,P217
+61,diocese,P708
+62,NKCR AUT ID,P691
+63,located on street,P669
+64,mother house,P612
+65,has part,P527
+66,screenwriter,P58
+68,ISO 639-1 code,P218
+69,ISO 639-3 code,P220
+70,graphic symbol of thoroughfare,P14
+71,IATA airline designator,P229
+72,ICAO airline designator,P230
+73,top-level internet domain,P78
+74,flag image,P41
+76,coat of arms image,P94
+77,educated at,P69
+78,Mérimée ID,P380
+79,ISSN,P236
+80,software version,P348
+81,capital,P36
+82,INSEE municipality code,P374
+83,noble title,P97
+84,head coach,P286
+85,continent,P30
+86,seal image,P158
+87,award received,P166
+88,place of interment,P119
+89,director,P57
+90,named after,P138
+91,employer,P108
+92,shares border with,P47
+93,member of sports team,P54
+95,instance of,P31
+98,sex or gender,P21
+99,country of citizenship,P27
+100,cast member,P161
+101,GND ID,P227
+102,source code repository,P1324
+103,license,P275
+104,inception,P571
+105,collection,P195
+106,owned by,P127
+108,area,P2046
+109,anthem,P85
+110,title,P1476
+111,contributed to published work,P3919
+112,headquarters location,P159
