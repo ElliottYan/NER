@@ -234,6 +234,8 @@ def ret_ground(func):
 # Not very cool for previous version, month variable is re-used and cause some problems.
 
 # if somehow the base_date is None, we need to fix that!!
+# Fix month capitalize problem. But found that some matching still has no explicit time value. (e.g. 450 years ago)
+
 @ret_ground
 def ground(tagged_text, base_date):
 
