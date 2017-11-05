@@ -46,6 +46,8 @@ def main():
                 pdb.set_trace()
 
 
+# we first need to seperate the document separately.
+# each file end with a </doc>
 def parse_wiki():
     data_path = "../wiki-data/"
     out_path = "../wiki-taged-data/"
@@ -56,12 +58,25 @@ def parse_wiki():
         for files in os.listdir(path):
             count += 1
             with open(path + files, "r") as f:
-                text = f.read()
-                timex_found, taged_text = timex.tag(text)
-            with open(out_path + dir + "_" +files, 'w') as fout:
-                fout.write(taged_text)
-            # if count >= 10:
-            #     return
+                lines = f.readlines()
+                index = 0
+                # for each doc
+                while index < len(lines):
+                    # denoting the starting line of a document
+                    start = index
+                    while lines[index].strip() != "</doc>":
+                        index += 1
+                    end = index
+                    # next line is the next start
+                    index += 1
+
+                    text = " ".join(lines[start:end])
+                    # call the modified ground func
+                    text = timex.ground(text)
+                    with open(out_path + dir + "_" +files, 'a') as fout:
+                        fout.write(text)
+                    if count >= 10:
+                        return
 
 
 if __name__ == "__main__":

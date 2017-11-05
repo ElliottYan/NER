@@ -61,7 +61,7 @@ reg7 = re.compile(regxp5, re.IGNORECASE)
 
 def tag(text):
     # Initialization
-    timex_found = []
+    exp_date = []
     real_Date = []
 
     # re.findall() finds all the substring matches, keep only the full
@@ -69,47 +69,47 @@ def tag(text):
     found = reg1.findall(text)
     found = [a[0] for a in found if len(a) > 1]
     for timex in found:
-        timex_found.append(timex)
+        exp_date.append(timex)
 
     # Variations of this thursday, next year, etc
     found = reg2.findall(text)
     found = [a[0] for a in found if len(a) > 1]
     for timex in found:
-        timex_found.append(timex)
+        exp_date.append(timex)
 
     # today, tomorrow, etc
     found = reg3.findall(text)
     for timex in found:
-        timex_found.append(timex)
+        exp_date.append(timex)
 
     # ISO
     found = reg4.findall(text)
     for timex in found:
-        timex_found.append(timex)
+        exp_date.append(timex)
 
     # # Year
     # found = reg5.findall(text)
     # for timex in found:
-    #     timex_found.append(timex)
+    #     exp_date.append(timex)
 
     # reg5 replaced by month + year
     found = reg5.findall(text)
     for timex in found:
-        timex_found.append(timex)
+        exp_date.append(timex)
         real_Date.append(timex)
 
     found = reg6.findall(text)
     for timex in found:
-        timex_found.append(timex)
+        exp_date.append(timex)
         real_Date.append(timex)
 
     found = reg7.findall(text)
     for timex in found:
-        timex_found.append(timex)
+        exp_date.append(timex)
         real_Date.append(timex)
 
     # Tag only temporal expressions which haven't been tagged.
-    for timex in timex_found:
+    for timex in exp_date:
         try:
             text = re.sub(timex + '(?!</TIMEX2>)', '<TIMEX2>' + timex + '</TIMEX2>', text)
         except:
@@ -215,21 +215,37 @@ def hashnum(number):
       return 1000
 
 
+# This deals with the problem of None base date (No explicit dates)
+# The solution is not to do any tagging.
+def ret_ground(func):
+    def call(text):
+        exp_date, tagged_text = tag(text)
+        base_date = retrieve_date_time(exp_date)
+        if base_date:
+            return func(tagged_text, base_date)
+        else:
+            return text
+    return call
+
+
 # Given a timex_tagged_text and a Date object set to base_date,
 # returns timex_grounded_text
 
 # Not very cool for previous version, month variable is re-used and cause some problems.
+
+# if somehow the base_date is None, we need to fix that!!
+@ret_ground
 def ground(tagged_text, base_date):
 
     # Find all identified timex and put them into a list
     # pdb.set_trace()
     timex_regex = re.compile(r'<TIMEX2>.*?</TIMEX2>', re.DOTALL)
-    timex_found = timex_regex.findall(tagged_text)
-    timex_found = map(lambda timex:re.sub(r'</?TIMEX2.*?>', '', timex), \
-                timex_found)
+    exp_date = timex_regex.findall(tagged_text)
+    exp_date = map(lambda timex:re.sub(r'</?TIMEX2.*?>', '', timex), \
+                exp_date)
 
     # Calculate the new date accordingly
-    for timex in timex_found:
+    for timex in exp_date:
         timex_val = 'UNKNOWN' # Default value
 
         timex_ori = timex   # Backup original timex for later substitution
@@ -254,6 +270,21 @@ def ground(tagged_text, base_date):
         # Specific dates
         elif re.match(r'\d{4}', timex):
             timex_val = str(timex)
+
+        # and we need time value for all real_time.
+
+        elif reg5.match(timex):
+            exp = reg5.findall(timex)[0]
+            timex_val = str(DateTime(int(exp[-1]), hashmonths[exp[-3]], int(exp[-2])))
+
+        elif reg6.match(timex):
+            exp = reg6.findall(timex)[0]
+            timex_val = str(DateTime(int(exp[-1]), hashmonths[exp[-2]]))
+
+        elif reg7.match(timex):
+            exp = reg7.findall(timex)[0]
+            timex_val = str(DateTime(int(exp[-1])))
+
 
         # Relative dates
         elif re.match(r'tonight|tonite|today', timex, re.IGNORECASE):
@@ -300,17 +331,17 @@ def ground(tagged_text, base_date):
 
         # Month in the previous year.
         elif re.match(r'last ' + month, timex, re.IGNORECASE):
-            month_val = hashmonths[timex.split()[1]]
+            month_val = hashmonths[timex.split()[1].capitalize()]
             timex_val = str(base_date.year - 1) + '-' + str(month_val)
 
         # Month in the current year.
         elif re.match(r'this ' + month, timex, re.IGNORECASE):
-            month_val = hashmonths[timex.split()[1]]
+            month_val = hashmonths[timex.split()[1].capitalize()]
             timex_val = str(base_date.year) + '-' + str(month_val)
 
         # Month in the following year.
         elif re.match(r'next ' + month, timex, re.IGNORECASE):
-            month_val = hashmonths[timex.split()[1]]
+            month_val = hashmonths[timex.split()[1].capitalize()]
             timex_val = str(base_date.year + 1) + '-' + str(month_val)
         elif re.match(r'last month', timex, re.IGNORECASE):
 
@@ -387,10 +418,7 @@ def ground(tagged_text, base_date):
             offset = int(re.split(r'\s', timex)[0])
             timex_val = str(base_date.year + offset)
 
-        elif re.match(regxp3, timex, re.IGNORECASE):
 
-            exp = re.split(r'[,\s]*', timex)
-            timex_val = str(exp[1] + "-" + hashmonths[exp[0]])
 
         # Remove 'time' from timex_val.
         # For example, If timex_val = 2000-02-20 12:23:34.45, then
@@ -405,17 +433,16 @@ def ground(tagged_text, base_date):
 
 
 # Got the base_date for each document.
-def retrieve_date_time(real_date):
+def retrieve_date_time(exp_date):
     # reverse order. The last shown timex is preferred.
-    pdb.set_trace()
-    if len(real_date) == 0:
+    if len(exp_date) == 0:
         return None
-    real_date.reverse()
-    for t in real_date:
+    exp_date.reverse()
+    for t in exp_date:
             if len(t) == 4:
-                base_date = DateTime(int(t[-1]), hashmonths[t[-2]], day=int(t[-3]))
+                base_date = DateTime(int(t[-1]), hashmonths[t[-3].capitalize()], int(t[-2]))
             elif len(t) == 3:
-                base_date = DateTime(int(t[-1]), hashmonths[t[-2]])
+                base_date = DateTime(int(t[-1]), hashmonths[t[-2].capitalize()])
             else:
                 base_date = DateTime(int(t[-1]))
             return base_date
@@ -428,10 +455,10 @@ def demo():
 
     import nltk
     text = nltk.corpus.abc.raw('rural.txt')[:10000]
-    timex_found, tged_text = tag(text)
+    exp_date, tged_text = tag(text)
     print(1)
     # pdb.set_trace()
-    ret_date = retrieve_date_time(timex_found)
+    ret_date = retrieve_date_time(exp_date)
     print("-"*10)
     print("-" * 10)
     print(ret_date)
