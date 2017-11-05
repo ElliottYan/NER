@@ -254,9 +254,12 @@ def ground(tagged_text, base_date):
         # eg. twenty five days ago --> 25 days ago
         if re.search(numbers, timex, re.IGNORECASE):
             split_timex = re.split(r'\s(?=days?|months?|years?|weeks?)', \
-                                                              timex, re.IGNORECASE)
+                                                              timex.lower(), re.IGNORECASE)
             value = split_timex[0]
-            unit = split_timex[1]
+            try:
+                unit = split_timex[1]
+            except:
+                pdb.set_trace()
             num_list = map(lambda s:hashnum(s),re.findall(numbers + '+', \
                                           value, re.IGNORECASE))
             timex = repr(sum(num_list)) + ' ' + unit
@@ -275,11 +278,11 @@ def ground(tagged_text, base_date):
 
         elif reg5.match(timex):
             exp = reg5.findall(timex)[0]
-            timex_val = str(DateTime(int(exp[-1]), hashmonths[exp[-3]], int(exp[-2])))
+            timex_val = str(DateTime(int(exp[-1]), hashmonths[exp[-3].capitalize()], int(exp[-2])))
 
         elif reg6.match(timex):
             exp = reg6.findall(timex)[0]
-            timex_val = str(DateTime(int(exp[-1]), hashmonths[exp[-2]]))
+            timex_val = str(DateTime(int(exp[-1]), hashmonths[exp[-2].capitalize()]))
 
         elif reg7.match(timex):
             exp = reg7.findall(timex)[0]
