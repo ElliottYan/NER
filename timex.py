@@ -41,7 +41,7 @@ regxp2 = "(" + exp2 + " (" + dmy + "|" + week_day + "|" + month + "))"
 # This reg expression can catch form of explicit day or month or year.
 # e.g. Februray 18th, 2005
 regxp3 = "(" + month + "\s*(\d{1,2})+[a-z,\s]*" + year + ")"
-regxp4 = "(" + month + "\s*" + year + ")"
+regxp4 = "(" + month + "[,\s]*" + year + ")"
 regxp5 = "(" + year + ")"
 
 # for time expression like 19 June, 1999
@@ -58,6 +58,7 @@ reg5 = re.compile(regxp3, re.IGNORECASE)
 reg6 = re.compile(regxp4, re.IGNORECASE)
 # year
 reg7 = re.compile(regxp5, re.IGNORECASE)
+
 
 def tag(text):
     # Initialization
@@ -266,31 +267,27 @@ def ground(tagged_text, base_date):
                                           value, re.IGNORECASE))
             timex = repr(sum(num_list)) + ' ' + unit
 
-        pdb.set_trace()
+        # pdb.set_trace()
 
         # If timex matches ISO format, remove 'time' and reorder 'date'
         if re.match(r'\d+[/-]\d+[/-]\d+ \d+:\d+:\d+\.\d+', timex):
             dmy = re.split(r'\s', timex)[0]
             dmy = re.split(r'/|-', dmy)
-            timex_val = str(dmy[2]) + '-' + str(dmy[1]) + '-' + str(dmy[0])
-
-        # Specific dates
-        elif re.match(r'\d{4}', timex):
-            timex_val = str(timex)
+            timex_val = Date(dmy[2], dmy[1], dmy[0])
 
         # and we need time value for all real_time.
-
-        elif reg5.match(timex):
-            exp = reg5.findall(timex)[0]
-            timex_val = str(Date(int(exp[-1]), hashmonths[exp[-3].capitalize()], int(exp[-2])))
+        # have to match in the detail to rough order.
+        elif reg7.match(timex):
+            exp = reg7.findall(timex)[0]
+            timex_val = str(Date(int(exp[-1])))
 
         elif reg6.match(timex):
             exp = reg6.findall(timex)[0]
             timex_val = str(Date(int(exp[-1]), hashmonths[exp[-2].capitalize()]))
 
-        elif reg7.match(timex):
-            exp = reg7.findall(timex)[0]
-            timex_val = str(Date(int(exp[-1])))
+        elif reg5.match(timex):
+            exp = reg5.findall(timex)[0]
+            timex_val = str(Date(int(exp[-1]), hashmonths[exp[-3].capitalize()], int(exp[-2])))
 
         # Relative dates
         elif re.match(r'tonight|tonite|today', timex, re.IGNORECASE):
@@ -387,15 +384,10 @@ def ground(tagged_text, base_date):
             timex_val = base_date + offset
         elif re.match(r'\d+ weeks? (ago|earlier|before)', timex, re.IGNORECASE):
             offset = int(re.split(r'\s', timex)[0])
-            year = (base_date + RelativeDate(weeks=-offset)).year
-            week = (base_date + \
-                            RelativeDate(weeks=-offset)).iso_week[1]
-            timex_val = str(year) + 'W' + str(week)
+            timex_val = base_date + RelativeDate(weeks=-offset)
         elif re.match(r'\d+ weeks? (later|after)', timex, re.IGNORECASE):
             offset = int(re.split(r'\s', timex)[0])
-            year = (base_date + RelativeDate(weeks=+offset)).year
-            week = (base_date + RelativeDate(weeks=+offset)).iso_week[1]
-            timex_val = str(year) + 'W' + str(week)
+            timex_val = base_date + RelativeDate(weeks=-offset)
         elif re.match(r'\d+ months? (ago|earlier|before)', timex, re.IGNORECASE):
             offset = int(re.split(r'\s', timex)[0])
             timex_val = base_date + RelativeDate(months = -offset)
@@ -406,7 +398,7 @@ def ground(tagged_text, base_date):
 
         elif re.match(r'\d+ years? (ago|earlier|before)', timex, re.IGNORECASE):
             offset = int(re.split(r'\s', timex)[0])
-            timex_val = base_date.year - RelativeDate(years = offset)
+            timex_val = base_date - RelativeDate(years=offset)
 
         elif re.match(r'\d+ years? (later|after)', timex, re.IGNORECASE):
             offset = int(re.split(r'\s', timex)[0])
@@ -449,14 +441,15 @@ def retrieve_date_time(exp_date):
 
 
 def demo():
-    s = "February 18th, 2005 "
+    s = "February, 2005 "
     print(reg5.findall(s))
 
     import nltk
     text = nltk.corpus.abc.raw('rural.txt')[:10000]
     exp_date, tged_text = tag(text)
     print(1)
-    ret_date = retrieve_date_time(exp_date)
+    # ret_date = retrieve_date_time(exp_date)
+    ret_date = ground(tged_text)
     print("-"*10)
     print("-" * 10)
     print(ret_date)
