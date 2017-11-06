@@ -1,8 +1,8 @@
 # from origin_data.riedel import Document_pb2
 import os
-import timex
 import pdb
 import timex
+import re
 
 # Now we need to process wikipedia text for timex extraction
 def main():
@@ -50,7 +50,7 @@ def main():
 # each file end with a </doc>
 def parse_wiki():
     data_path = "../wiki-data/"
-    out_path = "../wiki-taged-data/"
+    out_path = "../wiki-tagged-data/"
     dirs = os.listdir(data_path)
     count = 0
     for dir in dirs:
@@ -64,6 +64,7 @@ def parse_wiki():
                 while index < len(lines):
                     # denoting the starting line of a document
                     start = index
+                    title = "_".join(re.split(r'[^a-z|0-9]', lines[index+1].strip().lower()))
                     while lines[index].strip() != "</doc>":
                         index += 1
                     end = index
@@ -73,10 +74,10 @@ def parse_wiki():
                     text = " ".join(lines[start:end])
                     # call the modified ground func
                     text = timex.ground(text)
-                    with open(out_path + dir + "_" +files, 'a') as fout:
+                    with open(out_path + title, 'a') as fout:
                         fout.write(text)
-                    if count >= 10:
-                        return
+                    # if count >= 5:
+                    #     return
 
 
 if __name__ == "__main__":

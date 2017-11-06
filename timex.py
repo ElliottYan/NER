@@ -40,9 +40,11 @@ regxp2 = "(" + exp2 + " (" + dmy + "|" + week_day + "|" + month + "))"
 # match month and month_abbrev with comma or space in between.
 # This reg expression can catch form of explicit day or month or year.
 # e.g. Februray 18th, 2005
-regxp3 = "(" + month + "\s*(\d{1,2})+[a-z,\s]*" + year + ")"
+regxp3 = "(" + month + "\s*(\d{1,2})+[a-z]{0,2}[,\s]*" + year + ")"
+         # + year + ")"
 regxp4 = "(" + month + "[,\s]*" + year + ")"
 regxp5 = "(" + year + ")"
+regxp6 = "(" + month + "\s*(\d{1,2})+[a-z]{0,2}[,\s]*)"
 
 # for time expression like 19 June, 1999
 # regxp4 =
@@ -117,9 +119,10 @@ def tag(text):
             text = re.sub(timex[0] + '(?!</TIMEX2>)', '<TIMEX2>' + timex[0] + '</TIMEX2>', text)
     return real_Date, text
 
+
 # Hash function for week days to simplify the grounding task.
 # [Mon..Sun] -> [0..6]
-hashweekdays = {
+hashweekday = {
     'Monday': 0,
     'Tuesday': 1,
     'Wednesday': 2,
@@ -130,6 +133,13 @@ hashweekdays = {
 
 # Hash function for months to simplify the grounding task.
 # [Jan..Dec] -> [1..12]
+
+
+# add the function call to prevent some style problems.
+def hashweekdays(weekday):
+    return hashweekday[weekday.capitalize()]
+
+
 hashmonths = {
     'January': 1,
     'February': 2,
@@ -153,6 +163,7 @@ hashmonths = {
     'Nov': 11,
     'Dec': 12,
 }
+
 
 # Hash number in words into the corresponding integer value
 def hashnum(number):
@@ -277,17 +288,20 @@ def ground(tagged_text, base_date):
 
         # and we need time value for all real_time.
         # have to match in the detail to rough order.
-        elif reg7.match(timex):
-            exp = reg7.findall(timex)[0]
-            timex_val = str(Date(int(exp[-1])))
+        elif reg5.match(timex):
+            exp = reg5.findall(timex)[0]
+            try:
+                timex_val = Date(int(exp[-1]), hashmonths[exp[-3].capitalize()], int(exp[-2]))
+            except:
+                timex_val = Date(int(exp[-1]), hashmonths[exp[-3].capitalize()])
 
         elif reg6.match(timex):
             exp = reg6.findall(timex)[0]
-            timex_val = str(Date(int(exp[-1]), hashmonths[exp[-2].capitalize()]))
+            timex_val = Date(int(exp[-1]), hashmonths[exp[-2].capitalize()])
 
-        elif reg5.match(timex):
-            exp = reg5.findall(timex)[0]
-            timex_val = str(Date(int(exp[-1]), hashmonths[exp[-3].capitalize()], int(exp[-2])))
+        elif reg7.match(timex):
+            exp = reg7.findall(timex)[0]
+            timex_val = Date(int(exp[-1]))
 
         # Relative dates
         elif re.match(r'tonight|tonite|today', timex, re.IGNORECASE):
@@ -299,19 +313,19 @@ def ground(tagged_text, base_date):
 
         # Weekday in the previous week.
         elif re.match(r'last ' + week_day, timex, re.IGNORECASE):
-            day = hashweekdays[timex.split()[1]]
+            day = hashweekdays(timex.split()[1])
             timex_val = base_date + RelativeDate(weeks=-1, \
                             weekday=(day,0))
 
         # Weekday in the current week.
         elif re.match(r'this ' + week_day, timex, re.IGNORECASE):
-            day = hashweekdays[timex.split()[1]]
+            day = hashweekdays(timex.split()[1])
             timex_val = base_date + RelativeDate(weeks=0, \
                             weekday=(day,0))
 
         # Weekday in the following week.
         elif re.match(r'next ' + week_day, timex, re.IGNORECASE):
-            day = hashweekdays[timex.split()[1]]
+            day = hashweekdays(timex.split()[1])
             timex_val = base_date + RelativeDate(weeks=+1, \
                               weekday=(day,0))
 
@@ -441,18 +455,20 @@ def retrieve_date_time(exp_date):
 
 
 def demo():
-    s = "February, 2005 "
+    s = "February 11th , 2015"
     print(reg5.findall(s))
 
     import nltk
     text = nltk.corpus.abc.raw('rural.txt')[:10000]
-    exp_date, tged_text = tag(text)
+    exp_date, tged_text = tag(s)
     print(1)
     # ret_date = retrieve_date_time(exp_date)
-    ret_date = ground(tged_text)
+    # ret_date = ground(tged_text)
     print("-"*10)
     print("-" * 10)
-    print(ret_date)
+    # pdb.set_trace()
+    print(tged_text)
+
 
 
 if __name__ == '__main__':
