@@ -356,7 +356,6 @@ def ground(tagged_text, base_date):
             month_val = hashmonths[timex.split()[1].capitalize()]
             timex_val = Date(base_date.year, month_val)
 
-
         # Month in the previous year.
         elif re.match(r'last ' + month, timex, re.IGNORECASE):
             month_val = hashmonths[timex.split()[1].capitalize()]
@@ -461,7 +460,6 @@ def demo():
     import nltk
     text = nltk.corpus.abc.raw('rural.txt')[:10000]
     exp_date, tged_text = tag(s)
-    print(1)
     # ret_date = retrieve_date_time(exp_date)
     # ret_date = ground(tged_text)
     print("-"*10)
